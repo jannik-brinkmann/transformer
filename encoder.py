@@ -29,15 +29,11 @@ class EncoderModule(nn.Module):
     ):
 
         # multi-head attention
-        self_attn = self.self_attn(x=x)
-
-        # add & norm
+        self_attn = self.self_attn(q=x, k=x, v=x)
         x = self.norm1(x + self.dropout1(self_attn))
 
         # feed-forward
         ff = self.ff(x)
-        
-        # add & norm
         x = self.norm2(x + self.dropout2(ff))
 
         return x
