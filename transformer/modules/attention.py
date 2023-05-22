@@ -24,7 +24,7 @@ class Head(nn.Module):
         v = self.W_v(v)
 
         # compute scaled dot-product attention
-        dot = q @ k.transpose(-2,-1) * k.shape[-1] ** -(1 / 2)  # shape: [batch_size, seq_len, seq_len]
+        dot = q @ k.transpose(-2,-1) * k.shape[-1]**-0.5  # shape: [batch_size, seq_len, seq_len]
         dot = dot.masked_fill(self.tril[:seq_len, :seq_len] == 0, float('-inf'))
         dot = F.softmax(dot, dim=-1)
         dot = self.dropout(dot)
@@ -43,7 +43,7 @@ class MultiHeadAttention(nn.Module):
         self.U = nn.Linear(d_model, d_model)
         self.dropout = nn.Dropout(p_dropout)
 
-    def forward(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor, do_masking: bool = False) -> torch.Tensor:
-        outputs = torch.cat([h(q, k, v, do_masking) for h in self.heads], dim=-1)
+    def forward(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
+        outputs = torch.cat([h(q, k, v) for h in self.heads], dim=-1)
         outputs = self.dropout(self.U(outputs))
         return outputs
