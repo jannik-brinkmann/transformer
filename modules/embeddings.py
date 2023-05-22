@@ -43,13 +43,13 @@ class TokenEmbeddingsWithSinusoidalPositionalEncodings(nn.Module):
 class TokenEmbeddingsWithLearnedPositionalEmbeddings(nn.Module):
     """combines learned token embeddings and learned positional embeddings"""
 
-    def __init__(self, n_tokens: int, d_model: int, p_dropout: float) -> None:
+    def __init__(self, n_tokens: int, d_model: int, seq_len: int, p_dropout: float) -> None:
         super().__init__()
         self.token_embeddings = nn.Embedding(n_tokens, d_model)
-        self.positional_embeddings = nn.Embedding(n_tokens, d_model)
+        self.positional_embeddings = nn.Embedding(seq_len, d_model)
         self.dropout = nn.Dropout(p_dropout)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         token_embeddings = self.token_embeddings(x)
-        positional_encodings = self.positional_embeddings(x)
+        positional_encodings = self.positional_embeddings(torch.arange(x.size(1), device='cuda'))
         return self.dropout(token_embeddings + positional_encodings)
